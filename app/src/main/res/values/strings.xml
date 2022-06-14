@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CallAssistant</string>
+    <string name="CallReceiveOption">Turn on automatic call receive</string>
+    <string name="VoiceCallOption">Turn on automatic response</string>
+</resources>
