@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.telecom.TelecomManager;
@@ -31,6 +32,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.techninja01.callassistant.R;
 import com.techninja01.callassistant.services.CallAccept;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     public static AudioManager audioManager = null;
     public static BluetoothAdapter bluetoothAdapter = null;
     public static BluetoothManager bluetoothManager = null;
+    MediaPlayer mediaPlayer;
 //    public static BluetoothDevice[] bluetoothDevices;
 //    public static final int STATE_LISTENING = 1;
 //    public static final int STATE_CONNECTING = 2;
@@ -133,6 +136,30 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Bluetooth Management Ends
+//        Calendar c = Calendar.getInstance();
+//        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+//        if(timeOfDay >= 0 && timeOfDay < 12){
+//            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc1);
+//        }else if(timeOfDay >= 12 && timeOfDay < 16){
+//            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc2);
+//        }else if(timeOfDay >= 16 && timeOfDay < 21){
+//            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc1);
+//        }else if(timeOfDay >= 21 && timeOfDay < 24){
+//            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc2);
+//        }
+//
+//        responseSP.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (responseSP.isChecked()){
+//                    mediaPlayer.start();
+//                }else{
+//                    mediaPlayer.pause();
+//                }
+//            }
+//        });
+
+
 
     }
 

@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
@@ -25,7 +26,27 @@ import com.techninja01.callassistant.R;
 import com.techninja01.callassistant.broadcasts.CallReceiver;
 import com.techninja01.callassistant.views.MainActivity;
 
+import java.util.Calendar;
+
 public class CallAccept extends Service {
+    MediaPlayer mediaPlayer;
+
+    @Override
+    public void onCreate() {
+        Calendar c = Calendar.getInstance();
+        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+        if(timeOfDay >= 0 && timeOfDay < 12){
+            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc1);
+        }else if(timeOfDay >= 12 && timeOfDay < 16){
+            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc2);
+        }else if(timeOfDay >= 16 && timeOfDay < 21){
+            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc1);
+        }else if(timeOfDay >= 21 && timeOfDay < 24){
+            mediaPlayer = MediaPlayer.create(MainActivity.context,R.raw.msc2);
+        }
+        mediaPlayer.setLooping(true);
+        super.onCreate();
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -51,9 +72,11 @@ public class CallAccept extends Service {
                     }else{
                         Toast.makeText(context, "Bluetooth already enabled", Toast.LENGTH_SHORT).show();
                     }
+                    mediaPlayer.start();
                 }else if(MainActivity.telephonyManager.getCallState()==TelephonyManager.CALL_STATE_IDLE){
                     Log.d("CallAccepted","Call disconnected");
                     MainActivity.bluetoothAdapter.disable();
+                    mediaPlayer.pause();
                 }
             }
         }
@@ -82,5 +105,15 @@ public class CallAccept extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mediaPlayer!=null&& mediaPlayer.isPlaying()){
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        }
     }
 }
