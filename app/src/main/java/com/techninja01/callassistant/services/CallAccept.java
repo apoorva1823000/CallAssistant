@@ -26,6 +26,7 @@ import com.techninja01.callassistant.R;
 import com.techninja01.callassistant.broadcasts.CallReceiver;
 import com.techninja01.callassistant.views.MainActivity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 public class CallAccept extends Service {
@@ -69,6 +70,28 @@ public class CallAccept extends Service {
                     if (!MainActivity.bluetoothAdapter.isEnabled()) {
                         MainActivity.bluetoothAdapter.enable();
                         MainActivity.bluetoothAdapter.startDiscovery();
+
+
+
+
+                        String message = "Dear caller, the person you\'re calling is not available";
+                        Calendar c = Calendar.getInstance();
+                        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+                        if(timeOfDay >= 0 && timeOfDay < 12){
+                            message = "Good Morning dear caller, the person you\'re calling is busy";
+                        }else if(timeOfDay >= 12 && timeOfDay < 16){
+                            message = "Good Afternoon dear caller, the person you\'re calling is busy";
+                        }else if(timeOfDay >= 16 && timeOfDay < 21){
+                            message = "Good Evening dear caller, the person you\'re calling is busy";
+                        }else if(timeOfDay >= 21 && timeOfDay < 24){
+                            message = "Good Night dear caller, the person you\'re calling is sleeping";
+                        }
+                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
+
+
+
+
+
                     }else{
                         Toast.makeText(context, "Bluetooth already enabled", Toast.LENGTH_SHORT).show();
                     }
