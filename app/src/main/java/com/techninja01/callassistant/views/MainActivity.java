@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telecom.TelecomManager;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     public static BluetoothAdapter bluetoothAdapter = null;
     public static BluetoothManager bluetoothManager = null;
     MediaPlayer mediaPlayer;
-
+    public static SmsManager smsManager;
     BluetoothDevice[] bluetoothDevices;
     public static final int STATE_LISTENING = 1;
     public static final int STATE_CONNETING = 2;
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        Permissions Declaration Started
-        Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.READ_PHONE_STATE, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.RECORD_AUDIO).withListener(new MultiplePermissionsListener() {
+        Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.READ_PHONE_STATE, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_SMS,Manifest.permission.SEND_SMS,Manifest.permission.RECEIVE_SMS).withListener(new MultiplePermissionsListener() {
             @Override
             public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
@@ -121,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         bluetoothManager = getSystemService(BluetoothManager.class);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        smsManager = SmsManager.getDefault();
         if (bluetoothAdapter == null) {
             Toast.makeText(context, "Your device doesn't support bluetooth", Toast.LENGTH_SHORT).show();
         }

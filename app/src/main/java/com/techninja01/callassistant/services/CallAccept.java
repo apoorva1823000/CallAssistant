@@ -11,9 +11,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -66,7 +68,30 @@ public class CallAccept extends Service {
                     }
                     MainActivity.telecomManager.acceptRingingCall();
                 } else if (MainActivity.telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK) {
+
+                    String message = "Dear caller, the person you\'re calling is not available";
+                    Calendar c = Calendar.getInstance();
+                    int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+                    if(timeOfDay >= 0 && timeOfDay < 12){
+                        message = "Good Morning dear caller, the person you\'re calling is busy";
+                    }else if(timeOfDay >= 12 && timeOfDay < 16){
+                        message = "Good Afternoon dear caller, the person you\'re calling is busy";
+                    }else if(timeOfDay >= 16 && timeOfDay < 21){
+                        message = "Good Evening dear caller, the person you\'re calling is busy";
+                    }else if(timeOfDay >= 21 && timeOfDay < 24){
+                        message = "Good Night dear caller, the person you\'re calling is sleeping";
+                    }
+//                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
+
+                    try{
+                        MainActivity.smsManager.sendTextMessage("+918160081299",null,message,null,null);
+                        Log.d("SMS", "MSG Sent");
+                    }catch (Exception e){
+                        Log.d("SMS", "Error");
+                    }
+
                     Log.d("CallAccepted", "Call is accepted");
+//                    Toast.makeText(context, "Call received", Toast.LENGTH_SHORT).show();
                     if (!MainActivity.bluetoothAdapter.isEnabled()) {
                         MainActivity.bluetoothAdapter.enable();
                         MainActivity.bluetoothAdapter.startDiscovery();
@@ -74,30 +99,38 @@ public class CallAccept extends Service {
 
 
 
-                        String message = "Dear caller, the person you\'re calling is not available";
-                        Calendar c = Calendar.getInstance();
-                        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
-                        if(timeOfDay >= 0 && timeOfDay < 12){
-                            message = "Good Morning dear caller, the person you\'re calling is busy";
-                        }else if(timeOfDay >= 12 && timeOfDay < 16){
-                            message = "Good Afternoon dear caller, the person you\'re calling is busy";
-                        }else if(timeOfDay >= 16 && timeOfDay < 21){
-                            message = "Good Evening dear caller, the person you\'re calling is busy";
-                        }else if(timeOfDay >= 21 && timeOfDay < 24){
-                            message = "Good Night dear caller, the person you\'re calling is sleeping";
-                        }
-                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
-
-
-
+//                        AudioManager audioManager = (AudioManager) MainActivity.context.getSystemService(Context.AUDIO_SERVICE);
+//                        audioManager.setSpeakerphoneOn(true);
+//                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
 
                     }else{
                         Toast.makeText(context, "Bluetooth already enabled", Toast.LENGTH_SHORT).show();
+//                        String message = "Dear caller, the person you\'re calling is not available";
+//                        Calendar c = Calendar.getInstance();
+//                        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+//                        if(timeOfDay >= 0 && timeOfDay < 12){
+//                            message = "Good Morning dear caller, the person you\'re calling is busy";
+//                        }else if(timeOfDay >= 12 && timeOfDay < 16){
+//                            message = "Good Afternoon dear caller, the person you\'re calling is busy";
+//                        }else if(timeOfDay >= 16 && timeOfDay < 21){
+//                            message = "Good Evening dear caller, the person you\'re calling is busy";
+//                        }else if(timeOfDay >= 21 && timeOfDay < 24){
+//                            message = "Good Night dear caller, the person you\'re calling is sleeping";
+//                        }
+////                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
+//
+//                        try{
+//                            MainActivity.smsManager.sendTextMessage("+918160081299",null,message,null,null);
+//                            Log.d("SMS", "MSG Sent");
+//                        }catch (Exception e){
+//                            Log.d("SMS", "Error");
+//                        }
                     }
                     mediaPlayer.start();
                 }else if(MainActivity.telephonyManager.getCallState()==TelephonyManager.CALL_STATE_IDLE){
                     Log.d("CallAccepted","Call disconnected");
+                   // MainActivity.smsManager.sendTextMessage("+918160081299",null,"Call Over",null,null);
                     MainActivity.bluetoothAdapter.disable();
                     mediaPlayer.pause();
                 }
