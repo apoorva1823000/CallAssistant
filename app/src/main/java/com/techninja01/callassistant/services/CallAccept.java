@@ -14,8 +14,11 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,13 +30,16 @@ import androidx.core.app.ActivityCompat;
 import com.techninja01.callassistant.R;
 import com.techninja01.callassistant.broadcasts.CallReceiver;
 import com.techninja01.callassistant.views.MainActivity;
+import com.techninja01.callassistant.views.SpeakTheMessage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
+import java.util.Locale;
 
-public class CallAccept extends Service {
+public class CallAccept extends Service implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
     MediaPlayer mediaPlayer;
-
+    private TextToSpeech tts = null;
+    String message;
     @Override
     public void onCreate() {
         Calendar c = Calendar.getInstance();
@@ -58,10 +64,44 @@ public class CallAccept extends Service {
 
         //Broadcast Receiver Starts
         class CallReceiver extends BroadcastReceiver {
+            String msg_from;
+            String msgBody,mainMsgBody;
+
             @SuppressLint("UnsafeProtectedBroadcastReceiver")
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onReceive(Context context, Intent intent) {
+
+
+
+//                if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
+//                    Bundle bundle = intent.getExtras();
+//                    SmsMessage[] smsMessages;
+//                    if(bundle!=null){
+//                        try{
+//                            Object[] pdus = (Object[]) bundle.get("pdus");
+//                            smsMessages = new SmsMessage[pdus.length];
+//                            for(int i=0;i<smsMessages.length;i++){
+//                                smsMessages[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
+//                                msg_from = smsMessages[i].getOriginatingAddress();
+//                                msgBody = smsMessages[i].getMessageBody();
+//                                mainMsgBody = smsMessages[0].getMessageBody();
+//                                Toast.makeText(context, "From: "+msg_from+"\tContent: "+mainMsgBody, Toast.LENGTH_SHORT).show();
+//                                Intent speechIntent = new Intent();
+//                                speechIntent.setClass(context, SpeakTheMessage.class);
+//                                speechIntent.putExtra("MESSAGE", msgBody);
+//                                speechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+//                                context.startActivity(speechIntent);
+//                            }
+//                        }catch (Exception e){
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+
+
+
+
                 if (MainActivity.telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING) {
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
                         return;
@@ -69,7 +109,7 @@ public class CallAccept extends Service {
                     MainActivity.telecomManager.acceptRingingCall();
                 } else if (MainActivity.telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK) {
 
-                    String message = "Dear caller, the person you\'re calling is not available";
+                    message = "Dear caller, the person you\'re calling is not available";
                     Calendar c = Calendar.getInstance();
                     int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
                     if(timeOfDay >= 0 && timeOfDay < 12){
@@ -83,13 +123,30 @@ public class CallAccept extends Service {
                     }
 //                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
 
-                    try{
-                        MainActivity.smsManager.sendTextMessage("+918160081299",null,message,null,null);
-                        Log.d("SMS", "MSG Sent");
-                    }catch (Exception e){
-                        Log.d("SMS", "Error");
-                    }
+//                    try{
+//                        MainActivity.smsManager.sendTextMessage("+916352468065",null,message,null,null);
+//                        Log.d("SMS", "MSG Sent");
+//                    }catch (Exception e){
+//                        Log.d("SMS", "Error");
+//                    }
 
+//                    Intent speechIntent = new Intent();
+//                    speechIntent.setClass(context, SpeakTheMessage.class);
+//                    speechIntent.putExtra("MESSAGE", message);
+//                    speechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+//                    context.startActivity(speechIntent);
+                    tts = new TextToSpeech(MainActivity.context, new TextToSpeech.OnInitListener() {
+                        @Override
+                        public void onInit(int status) {
+                            if(status != TextToSpeech.ERROR){
+                                tts.setLanguage(Locale.UK);
+                                tts.setPitch(1);
+                                tts.setSpeechRate(0.5f);
+                            }
+                        }
+                    });
+//                    tts = new TextToSpeech(MainActivity.context, (TextToSpeech.OnInitListener) this);
+                    tts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
                     Log.d("CallAccepted", "Call is accepted");
 //                    Toast.makeText(context, "Call received", Toast.LENGTH_SHORT).show();
                     if (!MainActivity.bluetoothAdapter.isEnabled()) {
@@ -171,5 +228,15 @@ public class CallAccept extends Service {
             mediaPlayer.reset();
             mediaPlayer.release();
         }
+    }
+
+    public void onInit(int status) {
+        tts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+    }
+
+    // OnUtteranceCompletedListener impl
+    public void onUtteranceCompleted(String utteranceId) {
+        tts.shutdown();
+        tts = null;
     }
 }
