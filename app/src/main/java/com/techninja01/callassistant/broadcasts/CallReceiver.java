@@ -1,5 +1,7 @@
 package com.techninja01.callassistant.broadcasts;
 
+import static com.techninja01.callassistant.views.MainActivity.audioManager;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -7,8 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.tts.TextToSpeech;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsMessage;
@@ -21,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import com.techninja01.callassistant.views.MainActivity;
 import com.techninja01.callassistant.views.SpeakTheMessage;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -29,6 +35,7 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
     String msgBody,mainMsgBody,message;
     private TextToSpeech tts = null;
     private String msg = "";
+    MediaPlayer mediaPlayer;
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -99,12 +106,14 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
             }
 //                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
 
-//            try{
-//                MainActivity.smsManager.sendTextMessage("+916352468065",null,message,null,null);
-//                Log.d("SMS", "MSG Sent");
-//            }catch (Exception e){
-//                Log.d("SMS", "Error");
-//            }
+            for(int i=0;i<1;i++){
+                try{
+                    MainActivity.smsManager.sendTextMessage("+918160081299",null,message,null,null);
+                    Log.d("SMS", "MSG Sent");
+                }catch (Exception e){
+                    Log.d("SMS", "Error");
+                }
+            }
 
 
 
@@ -126,7 +135,46 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
                 }
             });
             tts = new TextToSpeech(MainActivity.context,this);
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        while(true) {
+                            sleep(1000);
+                            audioManager.setMode(AudioManager.MODE_IN_CALL);
+                            if (!audioManager.isSpeakerphoneOn())
+                                audioManager.setSpeakerphoneOn(true);
+                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
 
+            thread.start();
+
+//
+//
+//            MainActivity.mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
+//            MainActivity.mFileName += "/AudioRecording.3gp";
+//            MainActivity.mRecorder = new MediaRecorder();
+//            MainActivity.mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+//            MainActivity.mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+//            MainActivity.mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+//            MainActivity.mRecorder.setOutputFile(MainActivity.mFileName);
+//            try {
+//                MainActivity.mRecorder.prepare();
+//            } catch (IOException e) {
+//                Log.e("TAG", "prepare() failed");
+//            }
+//            MainActivity.mRecorder.start();
+
+
+
+//            audioManager.setMode(AudioManager.MODE_IN_CALL);
+//            audioManager.setSpeakerphoneOn(true);
+//            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
             if (!MainActivity.bluetoothAdapter.isEnabled()) {
                 MainActivity.bluetoothAdapter.enable();
@@ -158,13 +206,32 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
             Log.d("CallAccepted","Call disconnected");
             //MainActivity.smsManager.sendTextMessage("+918160081299",null,"Call Over",null,null);
             MainActivity.bluetoothAdapter.disable();
+
+
+//            mediaPlayer.pause();
+
+
+
+//            MainActivity.mRecorder.stop();
+//            MainActivity.mRecorder.release();
+//            MainActivity.mRecorder = null;
+//            MainActivity.mPlayer = new MediaPlayer();
+//            try {
+//                MainActivity.mPlayer.setDataSource(MainActivity.mFileName);
+//                MainActivity.mPlayer.prepare();
+//                MainActivity.mPlayer.start();
+//            } catch (IOException e) {
+//                Log.e("TAG", "prepare() failed");
+//            }
+
+
         }
     }
 
 
 
     public void onInit(int status) {
-        tts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+        tts.speak("Call generated", TextToSpeech.QUEUE_FLUSH, null);
     }
 
     // OnUtteranceCompletedListener impl
