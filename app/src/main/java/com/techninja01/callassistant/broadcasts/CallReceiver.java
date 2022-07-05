@@ -41,41 +41,6 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
     @Override
     public void onReceive(Context context, Intent intent) {
 
-
-
-
-//        if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
-//            Bundle bundle = intent.getExtras();
-//            SmsMessage[] smsMessages;
-//            if(bundle!=null){
-//                try{
-//                    Object[] pdus = (Object[]) bundle.get("pdus");
-//                    smsMessages = new SmsMessage[pdus.length];
-//                    for(int i=0;i<smsMessages.length;i++){
-//                        smsMessages[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
-//                        msg_from = smsMessages[i].getOriginatingAddress();
-//                        msgBody = smsMessages[i].getMessageBody();
-//                        mainMsgBody = smsMessages[0].getMessageBody();
-//                        Toast.makeText(context, "From: "+msg_from+"\tContent: "+mainMsgBody, Toast.LENGTH_SHORT).show();
-//                        Intent speechIntent = new Intent();
-//                        speechIntent.setClass(context, SpeakTheMessage.class);
-//                        speechIntent.putExtra("MESSAGE", msgBody);
-//                        speechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-//                        context.startActivity(speechIntent);
-//                    }
-//
-//
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-
-
-
-
-
-
         if (MainActivity.telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -96,7 +61,8 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
             Calendar c = Calendar.getInstance();
             int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
             if(timeOfDay >= 0 && timeOfDay < 12){
-                message = "Good Morning dear caller, the person you\'re calling is busy";
+//                message = "Good Morning dear caller, the person you\'re calling is busy";
+                message = "Suprabhat, Aapne Apoorva Mehta ko call kiya hai aur ve abhi dusra application bna rhe hai";
             }else if(timeOfDay >= 12 && timeOfDay < 16){
                 message = "Good Afternoon dear caller, the person you\'re calling is busy";
             }else if(timeOfDay >= 16 && timeOfDay < 21){
@@ -104,7 +70,6 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
             }else if(timeOfDay >= 21 && timeOfDay < 24){
                 message = "Good Night dear caller, the person you\'re calling is sleeping";
             }
-//                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
 
             for(int i=0;i<1;i++){
                 try{
@@ -131,6 +96,7 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
                         tts.setLanguage(Locale.UK);
                         tts.setPitch(1);
                         tts.setSpeechRate(0.5f);
+//                        textToSpeech.setLanguage();
                     }
                 }
             });
@@ -153,24 +119,6 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
             };
 
             thread.start();
-
-//
-//
-//            MainActivity.mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-//            MainActivity.mFileName += "/AudioRecording.3gp";
-//            MainActivity.mRecorder = new MediaRecorder();
-//            MainActivity.mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-//            MainActivity.mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-//            MainActivity.mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-//            MainActivity.mRecorder.setOutputFile(MainActivity.mFileName);
-//            try {
-//                MainActivity.mRecorder.prepare();
-//            } catch (IOException e) {
-//                Log.e("TAG", "prepare() failed");
-//            }
-//            MainActivity.mRecorder.start();
-
-
 
 //            audioManager.setMode(AudioManager.MODE_IN_CALL);
 //            audioManager.setSpeakerphoneOn(true);
@@ -208,23 +156,6 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
             MainActivity.bluetoothAdapter.disable();
 
 
-//            mediaPlayer.pause();
-
-
-
-//            MainActivity.mRecorder.stop();
-//            MainActivity.mRecorder.release();
-//            MainActivity.mRecorder = null;
-//            MainActivity.mPlayer = new MediaPlayer();
-//            try {
-//                MainActivity.mPlayer.setDataSource(MainActivity.mFileName);
-//                MainActivity.mPlayer.prepare();
-//                MainActivity.mPlayer.start();
-//            } catch (IOException e) {
-//                Log.e("TAG", "prepare() failed");
-//            }
-
-
         }
     }
 
@@ -234,7 +165,6 @@ public class CallReceiver extends BroadcastReceiver implements TextToSpeech.OnIn
         tts.speak("Call generated", TextToSpeech.QUEUE_FLUSH, null);
     }
 
-    // OnUtteranceCompletedListener impl
     public void onUtteranceCompleted(String utteranceId) {
         tts.shutdown();
         tts = null;

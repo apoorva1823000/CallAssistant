@@ -77,36 +77,6 @@ public class CallAccept extends Service implements TextToSpeech.OnInitListener, 
             @Override
             public void onReceive(Context context, Intent intent) {
 
-
-
-//                if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
-//                    Bundle bundle = intent.getExtras();
-//                    SmsMessage[] smsMessages;
-//                    if(bundle!=null){
-//                        try{
-//                            Object[] pdus = (Object[]) bundle.get("pdus");
-//                            smsMessages = new SmsMessage[pdus.length];
-//                            for(int i=0;i<smsMessages.length;i++){
-//                                smsMessages[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
-//                                msg_from = smsMessages[i].getOriginatingAddress();
-//                                msgBody = smsMessages[i].getMessageBody();
-//                                mainMsgBody = smsMessages[0].getMessageBody();
-//                                Toast.makeText(context, "From: "+msg_from+"\tContent: "+mainMsgBody, Toast.LENGTH_SHORT).show();
-//                                Intent speechIntent = new Intent();
-//                                speechIntent.setClass(context, SpeakTheMessage.class);
-//                                speechIntent.putExtra("MESSAGE", msgBody);
-//                                speechIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-//                                context.startActivity(speechIntent);
-//                            }
-//                        }catch (Exception e){
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-
-
-
-
                 if (MainActivity.telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING) {
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ANSWER_PHONE_CALLS) != PackageManager.PERMISSION_GRANTED) {
                         return;
@@ -118,7 +88,8 @@ public class CallAccept extends Service implements TextToSpeech.OnInitListener, 
                     Calendar c = Calendar.getInstance();
                     int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
                     if(timeOfDay >= 0 && timeOfDay < 12){
-                        message = "Good Morning dear caller, the person you\'re calling is busy";
+//                        message = "Good Morning dear caller, the person you\'re calling is busy";
+                        message = "Suprabhat, Aapne Apoorva Mehta ko call kiya hai aur ve abhi dusra application bna rhe hai";
                     }else if(timeOfDay >= 12 && timeOfDay < 16){
                         message = "Good Afternoon dear caller, the person you\'re calling is busy";
                     }else if(timeOfDay >= 16 && timeOfDay < 21){
@@ -128,11 +99,13 @@ public class CallAccept extends Service implements TextToSpeech.OnInitListener, 
                     }
 //                        MainActivity.sendReceive.write(message.getBytes(StandardCharsets.UTF_8));
 
-                    try{
-                        MainActivity.smsManager.sendTextMessage("+918160081299",null,message,null,null);
-                        Log.d("SMS", "MSG Sent");
-                    }catch (Exception e){
-                        Log.d("SMS", "Error");
+                    for(int i=0;i<1;i++){
+                        try{
+                            MainActivity.smsManager.sendTextMessage("+918160081299",null,message,null,null);
+                            Log.d("SMS", "MSG Sent");
+                        }catch (Exception e){
+                            Log.d("SMS", "Error");
+                        }
                     }
 
 //                    Intent speechIntent = new Intent();
