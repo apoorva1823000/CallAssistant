@@ -18,6 +18,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -30,10 +34,12 @@ import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -61,8 +67,13 @@ public class MainActivity extends AppCompatActivity {
     public static AudioManager audioManager = null;
     public static BluetoothAdapter bluetoothAdapter = null;
     public static BluetoothManager bluetoothManager = null;
+    public static SensorManager sensorManager = null;
+    public static Sensor shake = null;
     MediaPlayer mediaPlayer;
     public static SmsManager smsManager;
+    Button submit;
+    TextInputLayout number;
+    public static String phoneNumber;
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     @Override
@@ -71,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        Permissions Declaration Started
-        Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.RECORD_AUDIO,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.READ_PHONE_STATE, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_SMS,Manifest.permission.SEND_SMS,Manifest.permission.RECEIVE_SMS,Manifest.permission.BROADCAST_SMS).withListener(new MultiplePermissionsListener() {
+        Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.PROCESS_OUTGOING_CALLS,Manifest.permission.RECORD_AUDIO,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.ANSWER_PHONE_CALLS, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.BLUETOOTH, Manifest.permission.FOREGROUND_SERVICE, Manifest.permission.READ_PHONE_STATE, Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.RECORD_AUDIO,Manifest.permission.READ_SMS,Manifest.permission.SEND_SMS,Manifest.permission.RECEIVE_SMS,Manifest.permission.BROADCAST_SMS).withListener(new MultiplePermissionsListener() {
             @Override
             public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                 if (multiplePermissionsReport.areAllPermissionsGranted()) {
@@ -97,14 +108,17 @@ public class MainActivity extends AppCompatActivity {
 
 //        Initializing Variables
         callP = findViewById(R.id.ReceiveText);
-        responseP = findViewById(R.id.VoiceCallText);
         callSP = findViewById(R.id.ReceiveSwitch);
-        responseSP = findViewById(R.id.VoiceCallSwitch);
+        callSP.setChecked(false);
+        number = findViewById(R.id.addNum);
+        submit = findViewById(R.id.submitNum);
         listview = findViewById(R.id.listView);
         telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         telecomManager = (TelecomManager) getSystemService(TELECOM_SERVICE);
         context = this;
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        shake = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         bluetoothManager = getSystemService(BluetoothManager.class);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         smsManager = SmsManager.getDefault();
@@ -120,6 +134,30 @@ public class MainActivity extends AppCompatActivity {
         }
         //Service Terminated
 
+        //Number saved
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(number.getEditText().getText().toString().isEmpty()){
+                    phoneNumber = "+918160081299";
+                    Toast.makeText(MainActivity.this, phoneNumber, Toast.LENGTH_SHORT).show();
+                }else{
+                    phoneNumber = "+91"+number.getEditText().getText().toString().trim();
+                    Toast.makeText(MainActivity.this, phoneNumber, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        //Number Saved
+
+        SharedPreferences sharedPreferences2 = getSharedPreferences("Contact",MODE_PRIVATE);
+        SharedPreferences.Editor editor2 = getSharedPreferences("Contact",MODE_PRIVATE).edit();
+        editor2.putString("number",number.getEditText().getText().toString().trim());
+        editor2.apply();
+
+        //Number Saved
+
+
+
         //Service Management Started
 
         SharedPreferences sharedPreferences = getSharedPreferences("ServiceValue",MODE_PRIVATE);
@@ -128,11 +166,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(callSP.isChecked()){
-                    SharedPreferences.Editor editor = getSharedPreferences("ServiceValue",MODE_PRIVATE).edit();
-                    editor.putBoolean("value",true);
-                    editor.apply();
-                    callSP.setChecked(true);
-                    startForegroundService(new Intent(MainActivity.this,CallAccept.class));
+                    if(number.getEditText().getText().toString().trim()!=null){
+                        SharedPreferences.Editor editor = getSharedPreferences("ServiceValue",MODE_PRIVATE).edit();
+                        editor.putBoolean("value",true);
+                        editor.apply();
+                        callSP.setChecked(true);
+                        startForegroundService(new Intent(MainActivity.this,CallAccept.class));
+                    }else{
+                        number.requestFocus();
+                        number.setError("Kindly Fill This First");
+                        number.setErrorTextColor(ColorStateList.valueOf(Color.RED));
+                    }
                 }else{
                     SharedPreferences.Editor editor = getSharedPreferences("ServiceValue",MODE_PRIVATE).edit();
                     editor.putBoolean("value",false);
